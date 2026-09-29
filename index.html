@@ -606,18 +606,17 @@
     Object.assign(FRAMES[4], {
       title: "Мартин",
       text: "Зима 2024. Любимый кот Мартин.",
-      keywords: ["зима", "мартин", "кот", "любимый"],
+      keywords: ["вверху", "мартин", "любимый", "мартин"],
       aliases: {
-        зима: ["зима", "winter"],
+        вверху: ["вверху", "сверху", "выше"],
         мартин: ["мартин", "martin"],
-        кот: ["кот", "котик", "кошка"],
-        любимый: ["любимый", "любимый кот"]
+        любимый: ["любимый"]
       },
       hints: [
-        "время года",
-        "как зовут",
-        "кто на фото",
-        "какой он для вас"
+        "где мы подсматриваем ответ на 1-й вопрос?",
+        "как его зовут?",
+        "какой он? Лю…",
+        "да этот тот самый наш к.. Мар..?"
       ]
     });
 
@@ -1156,7 +1155,7 @@
     }
 
     function buildGuess(stage, f) {
-      const found = {};
+      const found = [];
       const WAIT = 15;
       let left = WAIT;
       const box = document.createElement("div");
@@ -1205,7 +1204,7 @@
       stage.appendChild(err);
 
       function leftover() {
-        return f.keywords.filter((k) => !found[k]);
+        return f.keywords.map((_, i) => i).filter((i) => !found[i]);
       }
 
       function finishWords() {
@@ -1222,16 +1221,17 @@
 
       function paintSlots() {
         slots.innerHTML = "";
-        f.keywords.forEach((k) => {
+        f.keywords.forEach((k, i) => {
           const s = document.createElement("span");
-          s.className = "slot" + (found[k] ? " ok" : "");
-          s.textContent = found[k] ? k : "••••";
+          s.className = "slot" + (found[i] ? " ok" : "");
+          s.textContent = found[i] ? k : "••••";
           slots.appendChild(s);
         });
-        const n = Object.keys(found).length;
-        const blur = Math.max(0, 22 - n * 6);
+        const n = leftover().length;
+        const got = f.keywords.length - n;
+        const blur = Math.max(0, 22 - got * 6);
         img.style.filter = "blur(" + blur + "px) saturate(0.7)";
-        $("hud").textContent = "слова " + n + " / " + f.keywords.length;
+        $("hud").textContent = "слова " + got + " / " + f.keywords.length;
       }
 
       function paintReveal() {
@@ -1260,8 +1260,9 @@
       revealBtn.addEventListener("click", () => {
         const rest = leftover();
         if (!rest.length || left > 0) return;
-        found[rest[0]] = true;
-        err.textContent = "открыто: " + rest[0];
+        const i = rest[0];
+        found[i] = true;
+        err.textContent = "открыто: " + f.keywords[i];
         left = WAIT;
         paintSlots();
         paintReveal();
@@ -1272,11 +1273,15 @@
         e.preventDefault();
         const guess = input.value;
         input.value = "";
-        let hit = null;
-        f.keywords.forEach((k) => {
-          if (!found[k] && matchesKeyword(guess, k, f.aliases)) hit = k;
+        let hit = -1;
+        leftover().some((i) => {
+          if (matchesKeyword(guess, f.keywords[i], f.aliases)) {
+            hit = i;
+            return true;
+          }
+          return false;
         });
-        if (!hit) {
+        if (hit < 0) {
           err.textContent = "не то слово — попробуй ещё";
           return;
         }
