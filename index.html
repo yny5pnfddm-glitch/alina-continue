@@ -324,6 +324,33 @@
     .kw-form .btn { width: auto; letter-spacing: 0.08em; padding: 12px 16px; }
     .reveal-btn[disabled] { opacity: 0.45; }
     .reveal-btn { margin-top: 4px; }
+    .mini {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      height: 100%;
+      padding: 16px;
+      text-align: center;
+    }
+    .mini p { margin: 0; color: var(--gold-2); font-size: 18px; line-height: 1.35; }
+    .mini-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
+    .mini .btn { width: auto; min-width: 64px; letter-spacing: 0.06em; }
+    .mini .btn.red { background: linear-gradient(180deg, rgba(255,77,109,0.45), rgba(255,77,109,0.12)); }
+    .mini input[type=range] { width: 100%; min-height: 44px; }
+    .mini label { display: flex; align-items: center; gap: 10px; font-size: 16px; min-height: 44px; }
+    .mini input[type=checkbox] { width: 22px; height: 22px; }
+    .sw {
+      min-width: 72px;
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #22151a;
+      color: var(--muted);
+      font: 600 14px var(--sans);
+    }
+    .sw.on { background: rgba(255,77,109,0.28); color: var(--gold-2); }
     .wait {
       flex: 1;
       display: flex;
@@ -1189,8 +1216,8 @@
         box.classList.remove("guess");
         img.style.filter = "";
         img.style.transform = "";
-        $("hud").textContent = "собери кадр · два фрагмента";
-        buildPuzzle(stage, f);
+        $("hud").textContent = "мини-игра";
+        playMini(stage, f);
       }
 
       function paintSlots() {
@@ -1261,66 +1288,386 @@
       });
     }
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function buildPuzzle(stage, f) {
+    function miniHost(stage, f, title) {
+      $("hud").textContent = title;
       const box = stage.querySelector(".photo-stage") || document.createElement("div");
-      if (!box.classList.contains("photo-stage")) {
+      if (!box.parentNode) {
         box.className = "photo-stage";
         stage.insertBefore(box, stage.firstChild);
       }
       box.innerHTML = "";
-      const grid = document.createElement("div");
-      grid.className = "grid9";
-      let positions = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
-      while (positions.every((p, i) => p === i)) positions = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
-      let selected = null;
+      const mini = document.createElement("div");
+      mini.className = "mini";
+      box.appendChild(mini);
+      return mini;
+    }
 
-      function paint() {
-        grid.innerHTML = "";
-        positions.forEach((piece, slot) => {
-          const t = document.createElement("button");
-          t.type = "button";
-          t.className = "tile" + (selected === slot ? " sel" : "");
-          t.style.backgroundImage = "url('" + f.displaySrc + "')";
-          const r = Math.floor(piece / 3);
-          const c = piece % 3;
-          t.style.backgroundPosition = (c * 50) + "% " + (r * 50) + "%";
-          t.addEventListener("click", () => {
-            if (selected == null) { selected = slot; paint(); return; }
-            if (selected === slot) { selected = null; paint(); return; }
-            const tmp = positions[selected];
-            positions[selected] = positions[slot];
-            positions[slot] = tmp;
-            selected = null;
-            paint();
-            if (positions.every((p, i) => p === i)) {
-              box.innerHTML = "";
-              box.appendChild(photoEl(f));
-              addCaption(stage, f);
-              if (!stage.querySelector("[data-win]")) {
-                const next = document.createElement("button");
-                next.className = "btn";
-                next.type = "button";
-                next.dataset.win = "1";
-                next.textContent = "сохранить кадр";
-                next.addEventListener("click", () => completeFrame(f.id));
-                stage.appendChild(next);
-              }
-            }
-          });
-          grid.appendChild(t);
-        });
+    function miniDone(stage, f) {
+      const box = stage.querySelector(".photo-stage");
+      box.innerHTML = "";
+      box.appendChild(photoEl(f));
+      addCaption(stage, f);
+      if (!stage.querySelector("[data-win]")) {
+        const next = document.createElement("button");
+        next.className = "btn";
+        next.type = "button";
+        next.dataset.win = "1";
+        next.textContent = "сохранить кадр";
+        next.addEventListener("click", () => completeFrame(f.id));
+        stage.appendChild(next);
       }
-      paint();
-      box.appendChild(grid);
+    }
+
+    function mkBtn(text, extra) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn" + (extra ? " " + extra : "");
+      b.textContent = text;
+      return b;
+    }
+
+    function choiceRow(mini, labels, win) {
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      labels.forEach((lab) => {
+        const b = mkBtn(String(lab));
+        b.addEventListener("click", () => {
+          if (String(lab) === String(win)) miniDone(mini._stage, mini._f);
+        });
+        row.appendChild(b);
+      });
+      mini.appendChild(row);
+    }
+
+    function playMini(stage, f) {
+      const list = [
+        miniTapN, miniSum22, miniHeart, miniHold, miniBigger,
+        miniToggles, miniEven, miniRed, miniOk, miniSmile,
+        miniSlider, miniOnlyYes, miniStars, miniTeplo, miniCount7,
+        miniLight, miniAB, miniOdd, miniTwice, miniSum11,
+        miniNext, miniCircle, miniGreen, miniAlina, miniCheck
+      ];
+      list[f.id - 1](stage, f);
+    }
+
+    function miniTapN(stage, f) {
+      const mini = miniHost(stage, f, "нажми 5 раз");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "просто нажми";
+      mini.appendChild(p);
+      let n = 0;
+      const b = mkBtn("0 / 5");
+      b.addEventListener("click", () => {
+        n += 1;
+        b.textContent = n + " / 5";
+        if (n >= 5) miniDone(stage, f);
+      });
+      mini.appendChild(b);
+    }
+
+    function miniSum22(stage, f) {
+      const mini = miniHost(stage, f, "сколько будет");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "2 + 2 = ?";
+      mini.appendChild(p);
+      choiceRow(mini, [3, 4, 5], 4);
+    }
+
+    function miniHeart(stage, f) {
+      const mini = miniHost(stage, f, "найди сердце");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "нажми ♥";
+      mini.appendChild(p);
+      choiceRow(mini, ["★", "♥", "●"], "♥");
+    }
+
+    function miniHold(stage, f) {
+      const mini = miniHost(stage, f, "подержи секунду");
+      const p = document.createElement("p");
+      p.textContent = "держи палец";
+      mini.appendChild(p);
+      const b = mkBtn("держи");
+      let t = null;
+      const start = (e) => { e.preventDefault(); t = setTimeout(() => miniDone(stage, f), 900); };
+      const cancel = () => clearTimeout(t);
+      b.addEventListener("pointerdown", start);
+      b.addEventListener("pointerup", cancel);
+      b.addEventListener("pointerleave", cancel);
+      b.addEventListener("pointercancel", cancel);
+      mini.appendChild(b);
+    }
+
+    function miniBigger(stage, f) {
+      const mini = miniHost(stage, f, "какое больше");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "выбери большее";
+      mini.appendChild(p);
+      choiceRow(mini, [3, 9, 5], 9);
+    }
+
+    function miniToggles(stage, f) {
+      const mini = miniHost(stage, f, "включи все");
+      const p = document.createElement("p");
+      p.textContent = "три выключателя";
+      mini.appendChild(p);
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      const on = [false, false, false];
+      [0, 1, 2].forEach((i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "sw";
+        b.textContent = "выкл";
+        b.addEventListener("click", () => {
+          on[i] = !on[i];
+          b.classList.toggle("on", on[i]);
+          b.textContent = on[i] ? "вкл" : "выкл";
+          if (on.every(Boolean)) miniDone(stage, f);
+        });
+        row.appendChild(b);
+      });
+      mini.appendChild(row);
+    }
+
+    function miniEven(stage, f) {
+      const mini = miniHost(stage, f, "чётное число");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "какое чётное";
+      mini.appendChild(p);
+      choiceRow(mini, [7, 4, 9], 4);
+    }
+
+    function miniRed(stage, f) {
+      const mini = miniHost(stage, f, "нажми красную");
+      const p = document.createElement("p");
+      p.textContent = "не серую — красную";
+      mini.appendChild(p);
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      const a = mkBtn("эта");
+      const b = mkBtn("эта", "red");
+      b.addEventListener("click", () => miniDone(stage, f));
+      row.appendChild(a);
+      row.appendChild(b);
+      mini.appendChild(row);
+    }
+
+    function miniOk(stage, f) {
+      const mini = miniHost(stage, f, "подтверди");
+      const p = document.createElement("p");
+      p.textContent = "нажми ОК";
+      mini.appendChild(p);
+      mini.appendChild(Object.assign(mkBtn("ОК"), { onclick: () => miniDone(stage, f) }));
+    }
+
+    function miniSmile(stage, f) {
+      const mini = miniHost(stage, f, "где улыбка");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "найди 🙂";
+      mini.appendChild(p);
+      choiceRow(mini, ["😐", "🙂", "😞"], "🙂");
+    }
+
+    function miniSlider(stage, f) {
+      const mini = miniHost(stage, f, "дотяни до конца");
+      const p = document.createElement("p");
+      p.textContent = "ползунок вправо";
+      mini.appendChild(p);
+      const r = document.createElement("input");
+      r.type = "range";
+      r.min = "0";
+      r.max = "100";
+      r.value = "0";
+      r.addEventListener("input", () => { if (+r.value >= 98) miniDone(stage, f); });
+      mini.appendChild(r);
+    }
+
+    function miniOnlyYes(stage, f) {
+      const mini = miniHost(stage, f, "очевидный выбор");
+      const p = document.createElement("p");
+      p.textContent = "YES или NO";
+      mini.appendChild(p);
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      const y = mkBtn("YES");
+      const n = mkBtn("NO", "ghost");
+      y.addEventListener("click", () => miniDone(stage, f));
+      row.appendChild(y);
+      row.appendChild(n);
+      mini.appendChild(row);
+    }
+
+    function miniStars(stage, f) {
+      const mini = miniHost(stage, f, "три звезды");
+      const p = document.createElement("p");
+      p.textContent = "нажми все ★";
+      mini.appendChild(p);
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      let got = 0;
+      ["★", "★", "★"].forEach(() => {
+        const b = mkBtn("★");
+        b.addEventListener("click", () => {
+          if (b.dataset.off) return;
+          b.dataset.off = "1";
+          b.textContent = "✦";
+          got += 1;
+          if (got >= 3) miniDone(stage, f);
+        });
+        row.appendChild(b);
+      });
+      mini.appendChild(row);
+    }
+
+    function miniTeplo(stage, f) {
+      const mini = miniHost(stage, f, "выбери слово");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "где «тепло»";
+      mini.appendChild(p);
+      choiceRow(mini, ["холод", "тепло", "ветер"], "тепло");
+    }
+
+    function miniCount7(stage, f) {
+      const mini = miniHost(stage, f, "досчитай до 7");
+      const p = document.createElement("p");
+      p.textContent = "нажимай плюс";
+      mini.appendChild(p);
+      let n = 0;
+      const b = mkBtn("+ 0");
+      b.addEventListener("click", () => {
+        n += 1;
+        b.textContent = "+ " + n;
+        if (n >= 7) miniDone(stage, f);
+      });
+      mini.appendChild(b);
+    }
+
+    function miniLight(stage, f) {
+      const mini = miniHost(stage, f, "самый светлый");
+      const p = document.createElement("p");
+      p.textContent = "выбери светлый";
+      mini.appendChild(p);
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      ["#3a1d28", "#f4e1cc", "#6b3a48"].forEach((c, i) => {
+        const b = mkBtn("■");
+        b.style.background = c;
+        b.style.color = i === 1 ? "#1a1014" : "#f4e1cc";
+        if (i === 1) b.addEventListener("click", () => miniDone(stage, f));
+        row.appendChild(b);
+      });
+      mini.appendChild(row);
+    }
+
+    function miniAB(stage, f) {
+      const mini = miniHost(stage, f, "сначала А, потом Б");
+      const p = document.createElement("p");
+      p.textContent = "порядок важен";
+      mini.appendChild(p);
+      const row = document.createElement("div");
+      row.className = "mini-row";
+      let step = 0;
+      const a = mkBtn("А");
+      const b = mkBtn("Б");
+      a.addEventListener("click", () => { if (step === 0) step = 1; });
+      b.addEventListener("click", () => { if (step === 1) miniDone(stage, f); });
+      row.appendChild(b);
+      row.appendChild(a);
+      mini.appendChild(row);
+    }
+
+    function miniOdd(stage, f) {
+      const mini = miniHost(stage, f, "лишний");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "кто тут лишний";
+      mini.appendChild(p);
+      choiceRow(mini, ["🐱", "🐱", "🐶"], "🐶");
+    }
+
+    function miniTwice(stage, f) {
+      const mini = miniHost(stage, f, "нажми дважды");
+      const p = document.createElement("p");
+      p.textContent = "два раза подряд";
+      mini.appendChild(p);
+      let n = 0;
+      const b = mkBtn("тык");
+      b.addEventListener("click", () => {
+        n += 1;
+        if (n >= 2) miniDone(stage, f);
+      });
+      mini.appendChild(b);
+    }
+
+    function miniSum11(stage, f) {
+      const mini = miniHost(stage, f, "совсем легко");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "1 + 1 = ?";
+      mini.appendChild(p);
+      choiceRow(mini, [1, 2, 11], 2);
+    }
+
+    function miniNext(stage, f) {
+      const mini = miniHost(stage, f, "иди дальше");
+      const p = document.createElement("p");
+      p.textContent = "нажми «дальше»";
+      mini.appendChild(p);
+      const b = mkBtn("дальше");
+      b.addEventListener("click", () => miniDone(stage, f));
+      mini.appendChild(b);
+    }
+
+    function miniCircle(stage, f) {
+      const mini = miniHost(stage, f, "найди круг");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "не квадрат";
+      mini.appendChild(p);
+      choiceRow(mini, ["■", "●", "▲"], "●");
+    }
+
+    function miniGreen(stage, f) {
+      const mini = miniHost(stage, f, "жди зелёный");
+      const p = document.createElement("p");
+      p.textContent = "подожди…";
+      mini.appendChild(p);
+      const b = mkBtn("ещё рано");
+      b.disabled = true;
+      mini.appendChild(b);
+      setTimeout(() => {
+        b.disabled = false;
+        b.textContent = "зелёный — жми";
+        b.style.background = "#2f6b45";
+        b.addEventListener("click", () => miniDone(stage, f), { once: true });
+      }, 1200);
+    }
+
+    function miniAlina(stage, f) {
+      const mini = miniHost(stage, f, "это ты");
+      mini._stage = stage; mini._f = f;
+      const p = document.createElement("p");
+      p.textContent = "как тебя зовут";
+      mini.appendChild(p);
+      choiceRow(mini, ["Маша", "Алина", "Катя"], "Алина");
+    }
+
+    function miniCheck(stage, f) {
+      const mini = miniHost(stage, f, "галочка");
+      const lab = document.createElement("label");
+      const c = document.createElement("input");
+      c.type = "checkbox";
+      lab.appendChild(c);
+      lab.appendChild(document.createTextNode("готово"));
+      c.addEventListener("change", () => { if (c.checked) miniDone(stage, f); });
+      mini.appendChild(lab);
     }
 
     $("yesBtn").addEventListener("click", () => { renderMap(); show("map"); });
