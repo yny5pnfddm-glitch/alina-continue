@@ -322,6 +322,8 @@
       font-family: var(--sans);
     }
     .kw-form .btn { width: auto; letter-spacing: 0.08em; padding: 12px 16px; }
+    .reveal-btn[disabled] { opacity: 0.45; }
+    .reveal-btn { margin-top: 4px; }
     .wait {
       flex: 1;
       display: flex;
@@ -1039,7 +1041,16 @@
       });
     }
 
+    let guessTick = null;
+    function stopGuessTick() {
+      if (guessTick) {
+        clearInterval(guessTick);
+        guessTick = null;
+      }
+    }
+
     function completeFrame(id) {
+      stopGuessTick();
       if (!state.done[id]) {
         state.done[id] = true;
         state.heat += 1;
@@ -1054,6 +1065,7 @@
     }
 
     function openLevel(id) {
+      stopGuessTick();
       state.index = id;
       const f = FRAMES[id - 1];
       $("lvTitle").textContent = f.title;
@@ -1118,6 +1130,8 @@
 
     function buildGuess(stage, f) {
       const found = {};
+      const WAIT = 45;
+      let left = WAIT;
       const box = document.createElement("div");
       box.className = "photo-stage guess";
       const img = photoEl(f);
@@ -1153,9 +1167,31 @@
       form.appendChild(input);
       form.appendChild(go);
       stage.appendChild(form);
+
+      const revealBtn = document.createElement("button");
+      revealBtn.type = "button";
+      revealBtn.className = "btn ghost reveal-btn";
+      stage.appendChild(revealBtn);
+
       const err = document.createElement("p");
       err.className = "caption";
       stage.appendChild(err);
+
+      function leftover() {
+        return f.keywords.filter((k) => !found[k]);
+      }
+
+      function finishWords() {
+        stopGuessTick();
+        form.remove();
+        revealBtn.remove();
+        hints.remove();
+        box.classList.remove("guess");
+        img.style.filter = "";
+        img.style.transform = "";
+        $("hud").textContent = "собери кадр · два фрагмента";
+        buildPuzzle(stage, f);
+      }
 
       function paintSlots() {
         slots.innerHTML = "";
@@ -1170,7 +1206,40 @@
         img.style.filter = "blur(" + blur + "px) saturate(0.7)";
         $("hud").textContent = "слова " + n + " / " + f.keywords.length;
       }
+
+      function paintReveal() {
+        if (!leftover().length) {
+          revealBtn.disabled = true;
+          revealBtn.textContent = "все слова открыты";
+          return;
+        }
+        if (left <= 0) {
+          revealBtn.disabled = false;
+          revealBtn.textContent = "открыть слово";
+        } else {
+          revealBtn.disabled = true;
+          revealBtn.textContent = "открыть слово · " + left + "с";
+        }
+      }
+
       paintSlots();
+      paintReveal();
+      stopGuessTick();
+      guessTick = setInterval(() => {
+        if (left > 0) left -= 1;
+        paintReveal();
+      }, 1000);
+
+      revealBtn.addEventListener("click", () => {
+        const rest = leftover();
+        if (!rest.length || left > 0) return;
+        found[rest[0]] = true;
+        err.textContent = "открыто: " + rest[0];
+        left = WAIT;
+        paintSlots();
+        paintReveal();
+        if (!leftover().length) finishWords();
+      });
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -1187,15 +1256,8 @@
         found[hit] = true;
         err.textContent = "";
         paintSlots();
-        if (Object.keys(found).length === f.keywords.length) {
-          form.remove();
-          hints.remove();
-          box.classList.remove("guess");
-          img.style.filter = "";
-          img.style.transform = "";
-          $("hud").textContent = "собери кадр · два фрагмента";
-          buildPuzzle(stage, f);
-        }
+        paintReveal();
+        if (!leftover().length) finishWords();
       });
     }
 
@@ -1265,7 +1327,7 @@
     $("noBtn").addEventListener("click", () => {
       $("noBtn").textContent = "ну нет, только YES";
     });
-    $("backBtn").addEventListener("click", () => { renderMap(); show("map"); });
+    $("backBtn").addEventListener("click", () => { stopGuessTick(); renderMap(); show("map"); });
     $("againBtn").addEventListener("click", () => { renderMap(); show("map"); });
 
     document.body.addEventListener("gesturestart", (e) => e.preventDefault());
