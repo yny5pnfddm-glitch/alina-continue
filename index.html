@@ -34,9 +34,7 @@
       margin: 0;
       padding: 0;
       width: 100%;
-      min-height: 100%;
-      min-height: 100svh;
-      min-height: -webkit-fill-available;
+      min-height: 100dvh;
       background: var(--bg);
       color: var(--gold-2);
       font-family: var(--sans);
@@ -45,24 +43,23 @@
     }
     body {
       height: 100dvh;
-      height: -webkit-fill-available;
     }
 
     .grain {
       pointer-events: none;
       position: fixed;
       inset: 0;
-      z-index: 50;
-      opacity: 0.09;
+      z-index: 1;
+      opacity: 0.07;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
     }
 
     .app {
       position: relative;
+      z-index: 2;
       width: 100%;
       max-width: 430px;
-      height: 100%;
+      height: 100dvh;
       margin: 0 auto;
       overflow: hidden;
       background:
@@ -71,8 +68,8 @@
         var(--bg);
     }
 
-    screen { display: none; position: absolute; inset: 0; }
-    screen.active { display: flex; flex-direction: column; }
+    .view { display: none; position: absolute; inset: 0; }
+    .view.active { display: flex; flex-direction: column; }
 
     .pad {
       padding-top: calc(var(--safe-t) + 18px);
@@ -99,10 +96,10 @@
       font-weight: 700;
       letter-spacing: 0.08em;
       margin: 0;
+      color: var(--gold);
       background: linear-gradient(180deg, #fff6ee, var(--gold));
       -webkit-background-clip: text;
       background-clip: text;
-      color: transparent;
       text-shadow: 0 0 40px rgba(232, 154, 168, 0.25);
     }
     .blink {
@@ -451,7 +448,7 @@
 <body>
   <div class="grain" aria-hidden="true"></div>
   <div class="app" id="app">
-    <screen id="boot" class="active pad">
+    <div id="boot" class="view active pad">
       <div class="boot-top">player 1 · Алина</div>
       <div class="boot-mid">
         <p class="names">Дима → Алина</p>
@@ -464,9 +461,9 @@
           <button class="btn ghost" id="noBtn" type="button">NO (шутка, нельзя)</button>
         </div>
       </div>
-    </screen>
+    </div>
 
-    <screen id="map" class="pad">
+    <div id="map" class="view pad">
       <div class="head">
         <div>
           <h1>Плёнка</h1>
@@ -475,9 +472,9 @@
         <div class="heat" id="heat">тепло 0/25</div>
       </div>
       <div class="roll" id="roll"></div>
-    </screen>
+    </div>
 
-    <screen id="level" class="pad">
+    <div id="level" class="view pad">
       <div class="lv-bar">
         <button class="back" id="backBtn" type="button">← плёнка</button>
         <div class="lv-title" id="lvTitle">Кадр</div>
@@ -485,13 +482,13 @@
       </div>
       <div class="hud" id="hud"></div>
       <div class="stage" id="stage"></div>
-    </screen>
+    </div>
 
-    <screen id="finale" class="pad">
+    <div id="finale" class="view pad">
       <h2>сохранено.</h2>
       <p id="finaleText">Плёнка собрана: 25 кадров про нас. Continue? Да. Сохранено.</p>
       <button class="btn" id="againBtn" type="button">ещё раз плёнку</button>
-    </screen>
+    </div>
   </div>
 
   <script>
