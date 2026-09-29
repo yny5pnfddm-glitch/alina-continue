@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Алина" />
+  <meta name="theme-color" content="#0a0708" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>CONTINUE? — для Алины</title>
+  <style>
+    :root {
+      --bg: #0a0708;
+      --bg2: #160e12;
+      --card: #1c1216;
+      --gold: #e7c6a8;
+      --gold-2: #f4e1cc;
+      --blush: #e89aa8;
+      --red: #ff4d6d;
+      --muted: rgba(244, 225, 204, 0.62);
+      --line: rgba(231, 198, 168, 0.22);
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-l: env(safe-area-inset-left, 0px);
+      --safe-r: env(safe-area-inset-right, 0px);
+      --serif: "Iowan Old Style", Palatino, "Palatino Linotype", "Times New Roman", serif;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      min-height: 100svh;
+      min-height: -webkit-fill-available;
+      background: var(--bg);
+      color: var(--gold-2);
+      font-family: var(--sans);
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    body {
+      height: 100dvh;
+      height: -webkit-fill-available;
+    }
+
+    .grain {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      opacity: 0.09;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    .app {
+      position: relative;
+      width: 100%;
+      max-width: 430px;
+      height: 100%;
+      margin: 0 auto;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 70% at 50% -10%, rgba(232, 154, 168, 0.16), transparent 55%),
+        radial-gradient(90% 50% at 100% 100%, rgba(255, 77, 109, 0.12), transparent 50%),
+        var(--bg);
+    }
+
+    screen { display: none; position: absolute; inset: 0; }
+    screen.active { display: flex; flex-direction: column; }
+
+    .pad {
+      padding-top: calc(var(--safe-t) + 18px);
+      padding-bottom: calc(var(--safe-b) + 18px);
+      padding-left: calc(var(--safe-l) + 20px);
+      padding-right: calc(var(--safe-r) + 20px);
+    }
+
+    /* —— CONTINUE —— */
+    #boot {
+      justify-content: space-between;
+      text-align: center;
+    }
+    .boot-top {
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .boot-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+    .game-over {
+      font-family: var(--serif);
+      font-size: clamp(40px, 12vw, 58px);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0;
+      background: linear-gradient(180deg, #fff6ee, var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 40px rgba(232, 154, 168, 0.25);
+    }
+    .blink {
+      animation: blink 1.15s steps(1) infinite;
+      font-size: 13px;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin: 6px 0 18px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .continue-q {
+      font-family: var(--serif);
+      font-size: clamp(28px, 9vw, 40px);
+      margin: 0 0 8px;
+    }
+    .boot-copy {
+      max-width: 320px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+      margin: 0 auto 22px;
+    }
+    .names { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,77,109,0.18), rgba(255,77,109,0.05));
+      color: var(--gold-2);
+      font: 600 16px/1 var(--sans);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 16px 22px;
+      min-height: 52px;
+      width: 100%;
+      border-radius: 16px;
+      cursor: pointer;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn.ghost {
+      background: transparent;
+      margin-top: 10px;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .choices { width: min(100%, 320px); margin: 0 auto; }
+
+    /* —— MAP —— */
+    #map { }
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .head h1 {
+      font-family: var(--serif);
+      font-size: 28px;
+      margin: 0;
+      font-weight: 700;
+    }
+    .head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .heat {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--blush);
+      white-space: nowrap;
+    }
+    .roll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding-bottom: 8px;
+    }
+    .frame {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      overflow: hidden;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+    }
+    .frame img, .frame .ph {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .frame .ph {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(145deg, #2a1a20, #12090c);
+      color: var(--muted);
+      font-family: var(--serif);
+      font-size: 28px;
+    }
+    .frame.locked { filter: grayscale(0.7) brightness(0.55); }
+    .frame.locked::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(10,7,8,0.25);
+    }
+    .badge {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: rgba(10,7,8,0.72);
+      padding: 5px 8px;
+      border-radius: 999px;
+    }
+    .frame.current { box-shadow: 0 0 0 2px var(--blush), 0 10px 30px rgba(255,77,109,0.18); }
+
+    /* —— LEVEL —— */
+    #level { }
+    .lv-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .back {
+      border: 0;
+      background: transparent;
+      color: var(--gold);
+      font: 600 15px/1 var(--sans);
+      min-height: 44px;
+      padding: 8px 4px;
+    }
+    .lv-title { font-family: var(--serif); font-size: 20px; }
+    .stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .photo-stage {
+      position: relative;
+      flex: 1;
+      min-height: 220px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #11090c;
+    }
+    .photo-stage img, .photo-stage .ph {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .vignette {
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.45);
+      pointer-events: none;
+    }
+    .caption {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--muted);
+      min-height: 44px;
+    }
+    #level.active { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .photo-stage.guess img {
+      filter: blur(22px) saturate(0.55);
+      transform: scale(1.16);
+      transition: filter 0.45s ease;
+    }
+    .hint-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .slots { display: flex; flex-wrap: wrap; gap: 8px; }
+    .slot {
+      border: 1px dashed var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .slot.ok {
+      border-style: solid;
+      color: var(--gold-2);
+      background: rgba(255, 77, 109, 0.14);
+    }
+    .kw-form { display: flex; gap: 8px; align-items: stretch; }
+    .kw-form input {
+      flex: 1;
+      min-width: 0;
+      min-height: 48px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #140c0f;
+      color: var(--gold-2);
+      padding: 12px 14px;
+      font-family: var(--sans);
+    }
+    .kw-form .btn { width: auto; letter-spacing: 0.08em; padding: 12px 16px; }
+    .wait {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 24px;
+    }
+    .hud {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blush);
+    }
+
+    /* develop */
+    .safelight {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(180,20,30,0.45), #090405 70%);
+      mix-blend-mode: multiply;
+      transition: opacity 0.6s ease;
+    }
+    .hold {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2;
+    }
+
+    /* puzzle */
+    .grid9 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 3px;
+      height: 100%;
+      background: #000;
+    }
+    .tile {
+      border: 0;
+      padding: 0;
+      background-size: 300% 300%;
+      background-repeat: no-repeat;
+      min-height: 0;
+      border-radius: 4px;
+    }
+    .tile.sel { outline: 2px solid var(--gold); outline-offset: -2px; }
+
+    /* hearts */
+    .arena {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+    }
+    .fall {
+      position: absolute;
+      font-size: 28px;
+      transform: translate(-50%, 0);
+      user-select: none;
+    }
+
+    /* memory */
+    .mem {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      height: 100%;
+      padding: 10px;
+    }
+    .mcard {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #22151a;
+      color: var(--gold);
+      font-family: var(--serif);
+      font-size: 28px;
+      min-height: 0;
+    }
+    .mcard .face { display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .mcard.open .face, .mcard.done .face { display: block; }
+    .mcard.open .heart-face, .mcard.done .heart-face {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      font-size: 42px;
+    }
+    .mcard.open .back, .mcard.done .back { display: none; }
+    .mcard .heart-face { display: none; }
+
+    /* finale */
+    #finale { justify-content: center; text-align: center; }
+    #finale h2 { font-family: var(--serif); font-size: clamp(32px, 10vw, 46px); margin: 0 0 12px; }
+    #finale p { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 320px; margin: 0 auto 24px; }
+
+    @media (min-width: 431px) {
+      .app {
+        border-left: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        box-shadow: 0 0 80px rgba(0,0,0,0.5);
+      }
+    }
+
+    /* iPhone 14: 390×844  |  iPhone 14 Pro: 393×852 */
+    @media screen and (max-width: 430px) and (min-height: 800px) {
+      .game-over { font-size: 48px; }
+      .roll { gap: 8px; }
+      .head h1 { font-size: 26px; }
+    }
+    @media screen and (max-width: 390px) {
+      .pad { padding-left: calc(var(--safe-l) + 16px); padding-right: calc(var(--safe-r) + 16px); }
+      .game-over { font-size: 42px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .blink { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="app" id="app">
+    <screen id="boot" class="active pad">
+      <div class="boot-top">player 1 · Алина</div>
+      <div class="boot-mid">
+        <p class="names">Дима → Алина</p>
+        <h1 class="game-over">GAME OVER</h1>
+        <p class="blink">checkpoint missed</p>
+        <h2 class="continue-q">Continue?</h2>
+        <p class="boot-copy">Мы чуть сбились с уровня. Я не хочу начинать заново — хочу сохранить игру. 25 кадров, начинается в Ереване. Разгадай слова — собери фото. Нажми YES.</p>
+        <div class="choices">
+          <button class="btn" id="yesBtn" type="button">YES · 25 кадров</button>
+          <button class="btn ghost" id="noBtn" type="button">NO (шутка, нельзя)</button>
+        </div>
+      </div>
+    </screen>
+
+    <screen id="map" class="pad">
+      <div class="head">
+        <div>
+          <h1>Плёнка</h1>
+          <p id="mapSub">кадры открываются по одному</p>
+        </div>
+        <div class="heat" id="heat">тепло 0/25</div>
+      </div>
+      <div class="roll" id="roll"></div>
+    </screen>
+
+    <screen id="level" class="pad">
+      <div class="lv-bar">
+        <button class="back" id="backBtn" type="button">← плёнка</button>
+        <div class="lv-title" id="lvTitle">Кадр</div>
+        <div class="heat" id="lvHeat"></div>
+      </div>
+      <div class="hud" id="hud"></div>
+      <div class="stage" id="stage"></div>
+    </screen>
+
+    <screen id="finale" class="pad">
+      <h2>сохранено.</h2>
+      <p id="finaleText">Плёнка собрана: 25 кадров про нас. Continue? Да. Сохранено.</p>
+      <button class="btn" id="againBtn" type="button">ещё раз плёнку</button>
+    </screen>
+  </div>
+
+  <script>
+    const FRAMES = Array.from({ length: 25 }, (_, i) => ({
+      id: i + 1,
+      src: "photos/" + String(i + 1).padStart(2, "0") + ".jpg",
+      title: "Кадр " + (i + 1),
+      text: "",
+      keywords: [],
+      aliases: {},
+      hints: []
+    }));
+
+    Object.assign(FRAMES[0], {
+      title: "Ереван",
+      text: "Мы. Ереван. Лето 2026. Вардавар. Первая поездка за границу.",
+      keywords: ["ереван", "вардавар", "лето", "поездка"],
+      aliases: {
+        ереван: ["ереван", "yerevan"],
+        вардавар: ["вардавар", "vardavar"],
+        лето: ["лето", "summer"],
+        поездка: ["поездка", "граница", "заграница", "за границей", "abroad"]
+      },
+      hints: [
+        "город, в котором снято",
+        "армянский праздник воды",
+        "время года",
+        "какая это была поездка"
+      ]
+    });
+
+    Object.assign(FRAMES[1], {
+      title: "Кострома",
+      text: "Алина. Костромская область. Зима 2025. Поездка в приют с животными, милые хаски.",
+      keywords: ["кострома", "зима", "приют", "хаски"],
+      aliases: {
+        кострома: ["кострома", "костромская", "костромская область"],
+        зима: ["зима", "winter"],
+        приют: ["приют", "животные", "животными"],
+        хаски: ["хаски", "хаска", "husky", "huskies"]
+      },
+      hints: [
+        "область",
+        "время года",
+        "куда поехали",
+        "какие собаки"
+      ]
+    });
+
+    Object.assign(FRAMES[2], {
+      title: "VR",
+      text: "Кострома, 2026. VR-арена. Групповые походы играть. Алина жаловалась, что болят глаза, но играла круче всех.",
+      keywords: ["кострома", "vr", "арена", "глаза"],
+      aliases: {
+        кострома: ["кострома"],
+        vr: ["vr", "вр", "виртуальная"],
+        арена: ["арена", "arena"],
+        глаза: ["глаза", "глаз"]
+      },
+      hints: [
+        "город",
+        "очки на голове",
+        "как называется зал",
+        "что у неё болело — и всё равно лучше всех"
+      ]
+    });
+
+    Object.assign(FRAMES[3], {
+      title: "Связь-энерго",
+      text: "Кострома. Связь-энерго. Новый год, декабрь 2026. Самый красивый сетевой инженер.",
+      keywords: ["кострома", "энерго", "новый", "инженер"],
+      aliases: {
+        кострома: ["кострома"],
+        энерго: ["энерго", "связь-энерго", "связьэнерго", "связь энерго"],
+        новый: ["новый год", "новый", "новогод", "декабрь"],
+        инженер: ["инженер", "сетевой"]
+      },
+      hints: [
+        "город",
+        "работа / компания",
+        "какой праздник",
+        "самый красивый …"
+      ]
+    });
+
+    Object.assign(FRAMES[4], {
+      title: "Мартин",
+      text: "Зима 2024. Любимый кот Мартин.",
+      keywords: ["зима", "мартин", "кот", "любимый"],
+      aliases: {
+        зима: ["зима", "winter"],
+        мартин: ["мартин", "martin"],
+        кот: ["кот", "котик", "кошка"],
+        любимый: ["любимый", "любимый кот"]
+      },
+      hints: [
+        "время года",
+        "как зовут",
+        "кто на фото",
+        "какой он для вас"
+      ]
+    });
+
+    Object.assign(FRAMES[5], {
+      title: "Калининград",
+      text: "2023. Калининград. Первый полёт на самолёте. Лучший фотограф — Алина за камерой.",
+      keywords: ["калининград", "полет", "самолет", "фотограф"],
+      aliases: {
+        калининград: ["калининград", "калининграда"],
+        полет: ["полет", "полёт", "первый полет", "первый полёт"],
+        самолет: ["самолет", "самолёт"],
+        фотограф: ["фотограф", "камера"]
+      },
+      hints: [
+        "город",
+        "что случилось впервые",
+        "на чём летели",
+        "кто снял этот кадр"
+      ]
+    });
+
+    Object.assign(FRAMES[6], {
+      title: "Берендеевка",
+      text: "Июнь 2025. Кострома. Катаемся на велосипедах из Берендеевки. Заезжали к Егору, Алина выбрала велосипед который хочет.",
+      keywords: ["кострома", "велосипед", "берендеевка", "егор"],
+      aliases: {
+        кострома: ["кострома"],
+        велосипед: ["велосипед", "велик", "велосипедах"],
+        берендеевка: ["берендеевка", "берендеевки"],
+        егор: ["егор", "егору"]
+      },
+      hints: [
+        "город",
+        "на чём катались",
+        "откуда выехали",
+        "к кому заезжали"
+      ]
+    });
+
+    Object.assign(FRAMES[7], {
+      title: "Петербург",
+      text: "Санкт-Петербург, лето 2025. Музей с зеркалами и иллюзиями. Очень долго стояли у экспонатов рядом с этим зеркалом, а ещё много сидели друг напротив друга и крутили-вертели разные штуки.",
+      keywords: ["петербург", "лето", "музей", "зеркало"],
+      aliases: {
+        петербург: ["петербург", "питер", "санкт-петербург", "санкт петербург"],
+        лето: ["лето", "summer"],
+        музей: ["музей", "иллюзии", "иллюзия"],
+        зеркало: ["зеркало", "зеркалом", "зеркалами"]
+      },
+      hints: [
+        "город",
+        "время года",
+        "куда зашли",
+        "что на фото перед ней"
+      ]
+    });
+
+    Object.assign(FRAMES[8], {
+      title: "Суздаль",
+      text: "Суздаль, лето 2025. Были траблы на парковке. В аквапарке было очень круто. На фото мы с Алиной. У Алины потом заложило ухо, но всё равно были счастливы.",
+      keywords: ["суздаль", "аквапарк", "парковка", "ухо"],
+      aliases: {
+        суздаль: ["суздаль"],
+        аквапарк: ["аквапарк", "аквапарке"],
+        парковка: ["парковка", "парковке", "траблы"],
+        ухо: ["ухо", "уши", "заложило"]
+      },
+      hints: [
+        "город",
+        "где было круто",
+        "где были траблы",
+        "что заложило у Алины"
+      ]
+    });
+
+    Object.assign(FRAMES[9], {
+      title: "Качалка",
+      text: "Лето 2025. Дача Качалка. Мы с Максом первый раз ушли на рыбалку. Алина ждёт дома и переживает за нас.",
+      keywords: ["качалка", "рыбалка", "макс", "дача"],
+      aliases: {
+        качалка: ["качалка"],
+        рыбалка: ["рыбалка", "рыбалке"],
+        макс: ["макс", "максом", "максим"],
+        дача: ["дача", "даче"]
+      },
+      hints: [
+        "название дачи",
+        "чем заняты",
+        "с кем ушли",
+        "где это было"
+      ]
+    });
+
+    Object.assign(FRAMES[10], {
+      title: "Плёс",
+      text: "Лето 2026. Повторяем проход в верёвочном парке в Плёсе. Алина пошла по сложной трассе — эксперт.",
+      keywords: ["плес", "веревочный", "парк", "эксперт"],
+      aliases: {
+        плес: ["плес", "плёс", "плесе", "плёсе"],
+        веревочный: ["веревочный", "верёвочный", "веревочном", "верёвочном"],
+        парк: ["парк", "парке"],
+        эксперт: ["эксперт", "сложная", "сложной"]
+      },
+      hints: [
+        "город",
+        "какой парк",
+        "где это",
+        "какую трассу выбрала Алина"
+      ]
+    });
+
+    Object.assign(FRAMES[11], {
+      title: "Цахкадзор",
+      text: "Цахкадзор, лето 2026. Поднялись на канатке. Дима очень боялся, Алина самая смелая — гладит лошадку.",
+      keywords: ["цахкадзор", "канатка", "лошадь", "смелая"],
+      aliases: {
+        цахкадзор: ["цахкадзор", "цахкадзоре"],
+        канатка: ["канатка", "канатке"],
+        лошадь: ["лошадь", "лошадка", "лошадку"],
+        смелая: ["смелая", "смелая алина"]
+      },
+      hints: [
+        "город в Армении",
+        "на чём поднимались",
+        "кого гладит Алина",
+        "какая Алина, если Дима боялся"
+      ]
+    });
+
+    Object.assign(FRAMES[12], {
+      title: "Москва",
+      text: "Зима 2026. Поездка в Москву. На фото Алина. Последняя локация в музее иллюзий.",
+      keywords: ["москва", "зима", "музей", "иллюзии"],
+      aliases: {
+        москва: ["москва", "москву"],
+        зима: ["зима", "winter"],
+        музей: ["музей", "музее"],
+        иллюзии: ["иллюзии", "иллюзий", "илюзий", "илюзии"]
+      },
+      hints: [
+        "город",
+        "время года",
+        "куда зашли",
+        "последняя локация какого музея"
+      ]
+    });
+
+    Object.assign(FRAMES[13], {
+      title: "Отель",
+      text: "Цахкадзор, лето 2026. Нашли офигенную локацию возле отеля. На фото Алина в этой локации.",
+      keywords: ["цахкадзор", "отель", "локация", "лето"],
+      aliases: {
+        цахкадзор: ["цахкадзор", "цахкадзоре"],
+        отель: ["отель", "отеля"],
+        локация: ["локация", "локации"],
+        лето: ["лето", "summer"]
+      },
+      hints: [
+        "город",
+        "возле чего нашли место",
+        "как ты это назвал",
+        "время года"
+      ]
+    });
+
+    Object.assign(FRAMES[14], {
+      title: "Лук",
+      text: "Зима 2025. Костромская область. Алина стреляет из лука.",
+      keywords: ["зима", "кострома", "лук", "алина"],
+      aliases: {
+        зима: ["зима", "winter"],
+        кострома: ["кострома", "костромская", "костромская область"],
+        лук: ["лук", "лука"],
+        алина: ["алина"]
+      },
+      hints: [
+        "время года",
+        "область",
+        "из чего стреляет",
+        "кто на фото"
+      ]
+    });
+
+    Object.assign(FRAMES[15], {
+      title: "Казань",
+      text: "Казань, 2024. Первая поездка на новой машине. На фото Алина в музее иллюзий, в который она очень хотела попасть.",
+      keywords: ["казань", "машина", "музей", "иллюзии"],
+      aliases: {
+        казань: ["казань", "казани"],
+        машина: ["машина", "машине", "новой машине"],
+        музей: ["музей", "музее"],
+        иллюзии: ["иллюзии", "иллюзий", "илюзий"]
+      },
+      hints: [
+        "город",
+        "на чём первая поездка",
+        "куда она очень хотела попасть",
+        "какой это музей"
+      ]
+    });
+
+    Object.assign(FRAMES[16], {
+      title: "Нижний",
+      text: "2025. Нижний Новгород. Мы на канатной дороге. Было очень смешно: припарковались снизу и пытались подняться по грязи к ней, а потом нам рассказывали про Бор начинающий экскурсовод.",
+      keywords: ["новгород", "канатная", "грязь", "бор"],
+      aliases: {
+        новгород: ["новгород", "нижний", "нижний новгород"],
+        канатная: ["канатная", "канатка", "канатной"],
+        грязь: ["грязь", "грязи"],
+        бор: ["бор", "боре"]
+      },
+      hints: [
+        "город",
+        "на чём едем",
+        "по чему поднимались снизу",
+        "про какой город рассказывал экскурсовод"
+      ]
+    });
+
+    Object.assign(FRAMES[17], {
+      title: "Фотосессия",
+      text: "Кострома, 2022. Фотосессия. Ппц какие мы красивые. Алина вытащила меня на эту фотосессию, я не хотел, но сейчас очень благодарен ей за это.",
+      keywords: ["кострома", "фотосессия", "красивые", "благодарен"],
+      aliases: {
+        кострома: ["кострома"],
+        фотосессия: ["фотосессия", "фотосессию"],
+        красивые: ["красивые", "красивые мы"],
+        благодарен: ["благодарен", "благодарна", "благодарность"]
+      },
+      hints: [
+        "город",
+        "что это было",
+        "ппц какие мы …",
+        "что Дима чувствует сейчас"
+      ]
+    });
+
+    Object.assign(FRAMES[18], {
+      title: "Дома",
+      text: "2025. Дома. Алина и любимый кот Мартин.",
+      keywords: ["алина", "мартин", "кот", "дома"],
+      aliases: {
+        алина: ["алина"],
+        мартин: ["мартин", "martin"],
+        кот: ["кот", "котик"],
+        дома: ["дома"]
+      },
+      hints: [
+        "кто обнимает",
+        "как зовут кота",
+        "кто ещё на фото",
+        "где снято"
+      ]
+    });
+
+    Object.assign(FRAMES[19], {
+      title: "Икра",
+      text: "Икра. Корпоратив, 2024. Мы вместе с Алиной и коллективом.",
+      keywords: ["икра", "корпоратив", "алина", "коллектив"],
+      aliases: {
+        икра: ["икра", "ikra"],
+        корпоратив: ["корпоратив"],
+        алина: ["алина"],
+        коллектив: ["коллектив", "коллективом"]
+      },
+      hints: [
+        "название места на венке",
+        "что за вечер",
+        "кто рядом с тобой",
+        "с кем ещё на фото"
+      ]
+    });
+
+    Object.assign(FRAMES[20], {
+      title: "Сап",
+      text: "Июль 2024. Кострома. Алина вытащила меня на покатушки на сапбордах. В ВК пост под песню «куда глаза горят».",
+      keywords: ["кострома", "сап", "покатушки", "песня"],
+      aliases: {
+        кострома: ["кострома"],
+        сап: ["сап", "сапборд", "сапбордах", "sup"],
+        покатушки: ["покатушки"],
+        песня: ["песня", "глаза горят", "куда глаза горят"]
+      },
+      hints: [
+        "город",
+        "на чём катались",
+        "как Алина это назвала",
+        "пост в ВК был под какую …"
+      ]
+    });
+
+    Object.assign(FRAMES[21], {
+      title: "Балтика",
+      text: "Калининград, 2023. Мы поехали на экскурсию, и Дима первый раз искупался в Балтийском море. Был очень дешёвый рейс.",
+      keywords: ["калининград", "экскурсия", "море", "рейс"],
+      aliases: {
+        калининград: ["калининград"],
+        экскурсия: ["экскурсия", "экскурсию"],
+        море: ["море", "балтийское", "балтика"],
+        рейс: ["рейс"]
+      },
+      hints: [
+        "город",
+        "куда поехали в этот день",
+        "где Дима купался впервые",
+        "какой был перелёт"
+      ]
+    });
+
+    Object.assign(FRAMES[22], {
+      src: "photos/23.png",
+      title: "Форт 11",
+      text: "2023. Дёнхдорф. Ночной форт 11. На фото Алина. Была летучая мышь и самая крутая экскурсия.",
+      keywords: ["денхофф", "форт", "мышь", "экскурсия"],
+      aliases: {
+        денхофф: ["денхофф", "дёнхофф", "денхдорф", "дёнхдорф"],
+        форт: ["форт", "ночной форт"],
+        мышь: ["мышь", "летучая"],
+        экскурсия: ["экскурсия"]
+      },
+      hints: [
+        "как называется место",
+        "ночной … 11",
+        "кто летал",
+        "самая крутая …"
+      ]
+    });
+
+    Object.assign(FRAMES[23], {
+      title: "Казань",
+      text: "Казань, 2024. Мечеть рядом с церковью, и мы счастливы вместе.",
+      keywords: ["казань", "мечеть", "церковь", "счастливы"],
+      aliases: {
+        казань: ["казань"],
+        мечеть: ["мечеть"],
+        церковь: ["церковь", "церквью", "церковью"],
+        счастливы: ["счастливы", "счастливые"]
+      },
+      hints: [
+        "город",
+        "что сзади на фото",
+        "что рядом с ней",
+        "какие вы вместе"
+      ]
+    });
+
+    Object.assign(FRAMES[24], {
+      title: "Милое",
+      text: "Кострома, 2022. На фото мы с Алиной. Наше самое милое фото.",
+      keywords: ["кострома", "алина", "милое", "фото"],
+      aliases: {
+        кострома: ["кострома"],
+        алина: ["алина"],
+        милое: ["милое", "милая", "милые"],
+        фото: ["фото", "фотография"]
+      },
+      hints: [
+        "город",
+        "кто с Димой",
+        "какое это фото для вас",
+        "что это за кадр"
+      ]
+    });
+
+    const state = {
+      unlocked: 1,
+      done: {},
+      heat: 0,
+      index: 1
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const screens = { boot: $("boot"), map: $("map"), level: $("level"), finale: $("finale") };
+
+    function show(name) {
+      Object.values(screens).forEach((el) => el.classList.remove("active"));
+      screens[name].classList.add("active");
+    }
+
+    function filmPlaceholder(n) {
+      const c = document.createElement("canvas");
+      c.width = 720;
+      c.height = 960;
+      const g = c.getContext("2d");
+      const grd = g.createLinearGradient(0, 0, 720, 960);
+      grd.addColorStop(0, "#3a1d28");
+      grd.addColorStop(0.55, "#1a1014");
+      grd.addColorStop(1, "#0c0709");
+      g.fillStyle = grd;
+      g.fillRect(0, 0, 720, 960);
+      g.strokeStyle = "rgba(231,198,168,0.28)";
+      g.lineWidth = 8;
+      g.strokeRect(28, 28, 664, 904);
+      g.fillStyle = "#e7c6a8";
+      g.textAlign = "center";
+      g.font = "italic 92px Georgia";
+      g.fillText(String(n).padStart(2, "0"), 360, 490);
+      g.font = "20px sans-serif";
+      g.fillStyle = "rgba(231,198,168,0.55)";
+      g.fillText("АЛИНА · ДИМА", 360, 560);
+      return c.toDataURL("image/jpeg", 0.82);
+    }
+
+    FRAMES.forEach((f) => {
+      f.displaySrc = filmPlaceholder(f.id);
+      const probe = new Image();
+      probe.onload = () => {
+        f.displaySrc = f.src;
+        if (screens.map.classList.contains("active")) renderMap();
+      };
+      probe.src = f.src;
+    });
+
+    function photoEl(f) {
+      const img = document.createElement("img");
+      img.alt = f.title;
+      img.src = f.displaySrc;
+      return img;
+    }
+
+    function renderMap() {
+      $("heat").textContent = "тепло " + state.heat + "/25";
+      $("mapSub").textContent = state.heat === 25 ? "все кадры проявлены" : "открой следующий кадр";
+      const roll = $("roll");
+      roll.innerHTML = "";
+      FRAMES.forEach((f) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "frame";
+        if (f.id > state.unlocked) b.classList.add("locked");
+        if (f.id === state.unlocked && !state.done[f.id]) b.classList.add("current");
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = state.done[f.id] ? "проявлено" : (f.id > state.unlocked ? "закрыто" : (f.keywords.length ? "разгадать" : "ждём"));
+        if (state.done[f.id]) b.appendChild(photoEl(f));
+        else {
+          const img = document.createElement("img");
+          img.alt = f.title;
+          img.src = filmPlaceholder(f.id);
+          b.appendChild(img);
+        }
+        b.appendChild(badge);
+        b.addEventListener("click", () => {
+          if (f.id > state.unlocked) return;
+          openLevel(f.id);
+        });
+        roll.appendChild(b);
+      });
+    }
+
+    function completeFrame(id) {
+      if (!state.done[id]) {
+        state.done[id] = true;
+        state.heat += 1;
+        if (id === state.unlocked && state.unlocked < 25) state.unlocked += 1;
+      }
+      if (state.heat >= 25) {
+        show("finale");
+        return;
+      }
+      renderMap();
+      show("map");
+    }
+
+    function openLevel(id) {
+      state.index = id;
+      const f = FRAMES[id - 1];
+      $("lvTitle").textContent = f.title;
+      $("lvHeat").textContent = id + " / 25";
+      const stage = $("stage");
+      stage.innerHTML = "";
+      if (state.done[id]) {
+        $("hud").textContent = "кадр уже в плёнке";
+        buildStory(stage, f, true);
+      } else if (!f.keywords.length) {
+        $("hud").textContent = "ещё не проявлено";
+        const wait = document.createElement("div");
+        wait.className = "wait";
+        wait.textContent = "Кадр " + id + " Дима ещё не загрузил. Это не баг — плёнка заполняется по одному.";
+        stage.appendChild(wait);
+      } else {
+        $("hud").textContent = "слова, потом пазл";
+        buildGuess(stage, f);
+      }
+      show("level");
+    }
+
+    function addCaption(stage, f) {
+      const p = document.createElement("p");
+      p.className = "caption";
+      p.textContent = f.text;
+      stage.appendChild(p);
+    }
+
+    function buildStory(stage, f, already) {
+      const box = document.createElement("div");
+      box.className = "photo-stage";
+      box.appendChild(photoEl(f));
+      const v = document.createElement("div");
+      v.className = "vignette";
+      box.appendChild(v);
+      stage.appendChild(box);
+      addCaption(stage, f);
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.type = "button";
+      btn.textContent = already ? "назад" : "сохранить кадр";
+      btn.addEventListener("click", () => already ? (renderMap(), show("map")) : completeFrame(f.id));
+      stage.appendChild(btn);
+    }
+
+    function norm(s) {
+      return String(s).toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim();
+    }
+
+    function matchesKeyword(guess, key, aliases) {
+      const g = norm(guess);
+      const list = (aliases && aliases[key]) ? aliases[key] : [key];
+      return list.some((a) => {
+        const n = norm(a);
+        if (!n || !g) return false;
+        if (g === n) return true;
+        if (n.length >= 5 && g.includes(n)) return true;
+        return (" " + g + " ").indexOf(" " + n + " ") !== -1;
+      });
+    }
+
+    function buildGuess(stage, f) {
+      const found = {};
+      const box = document.createElement("div");
+      box.className = "photo-stage guess";
+      const img = photoEl(f);
+      box.appendChild(img);
+      stage.appendChild(box);
+
+      const hints = document.createElement("ul");
+      hints.className = "hint-list";
+      f.hints.forEach((h) => {
+        const li = document.createElement("li");
+        li.textContent = h;
+        hints.appendChild(li);
+      });
+      stage.appendChild(hints);
+
+      const slots = document.createElement("div");
+      slots.className = "slots";
+      stage.appendChild(slots);
+
+      const form = document.createElement("form");
+      form.className = "kw-form";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.enterKeyHint = "done";
+      input.autocapitalize = "none";
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.placeholder = "слово";
+      const go = document.createElement("button");
+      go.className = "btn";
+      go.type = "submit";
+      go.textContent = "ок";
+      form.appendChild(input);
+      form.appendChild(go);
+      stage.appendChild(form);
+      const err = document.createElement("p");
+      err.className = "caption";
+      stage.appendChild(err);
+
+      function paintSlots() {
+        slots.innerHTML = "";
+        f.keywords.forEach((k) => {
+          const s = document.createElement("span");
+          s.className = "slot" + (found[k] ? " ok" : "");
+          s.textContent = found[k] ? k : "••••";
+          slots.appendChild(s);
+        });
+        const n = Object.keys(found).length;
+        const blur = Math.max(0, 22 - n * 6);
+        img.style.filter = "blur(" + blur + "px) saturate(0.7)";
+        $("hud").textContent = "слова " + n + " / " + f.keywords.length;
+      }
+      paintSlots();
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const guess = input.value;
+        input.value = "";
+        let hit = null;
+        f.keywords.forEach((k) => {
+          if (!found[k] && matchesKeyword(guess, k, f.aliases)) hit = k;
+        });
+        if (!hit) {
+          err.textContent = "не то слово — попробуй ещё";
+          return;
+        }
+        found[hit] = true;
+        err.textContent = "";
+        paintSlots();
+        if (Object.keys(found).length === f.keywords.length) {
+          form.remove();
+          hints.remove();
+          box.classList.remove("guess");
+          img.style.filter = "";
+          img.style.transform = "";
+          $("hud").textContent = "собери кадр · два фрагмента";
+          buildPuzzle(stage, f);
+        }
+      });
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildPuzzle(stage, f) {
+      const box = stage.querySelector(".photo-stage") || document.createElement("div");
+      if (!box.classList.contains("photo-stage")) {
+        box.className = "photo-stage";
+        stage.insertBefore(box, stage.firstChild);
+      }
+      box.innerHTML = "";
+      const grid = document.createElement("div");
+      grid.className = "grid9";
+      let positions = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+      while (positions.every((p, i) => p === i)) positions = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+      let selected = null;
+
+      function paint() {
+        grid.innerHTML = "";
+        positions.forEach((piece, slot) => {
+          const t = document.createElement("button");
+          t.type = "button";
+          t.className = "tile" + (selected === slot ? " sel" : "");
+          t.style.backgroundImage = "url('" + f.displaySrc + "')";
+          const r = Math.floor(piece / 3);
+          const c = piece % 3;
+          t.style.backgroundPosition = (c * 50) + "% " + (r * 50) + "%";
+          t.addEventListener("click", () => {
+            if (selected == null) { selected = slot; paint(); return; }
+            if (selected === slot) { selected = null; paint(); return; }
+            const tmp = positions[selected];
+            positions[selected] = positions[slot];
+            positions[slot] = tmp;
+            selected = null;
+            paint();
+            if (positions.every((p, i) => p === i)) {
+              box.innerHTML = "";
+              box.appendChild(photoEl(f));
+              addCaption(stage, f);
+              if (!stage.querySelector("[data-win]")) {
+                const next = document.createElement("button");
+                next.className = "btn";
+                next.type = "button";
+                next.dataset.win = "1";
+                next.textContent = "сохранить кадр";
+                next.addEventListener("click", () => completeFrame(f.id));
+                stage.appendChild(next);
+              }
+            }
+          });
+          grid.appendChild(t);
+        });
+      }
+      paint();
+      box.appendChild(grid);
+    }
+
+    $("yesBtn").addEventListener("click", () => { renderMap(); show("map"); });
+    $("noBtn").addEventListener("click", () => {
+      $("noBtn").textContent = "ну нет, только YES";
+    });
+    $("backBtn").addEventListener("click", () => { renderMap(); show("map"); });
+    $("againBtn").addEventListener("click", () => { renderMap(); show("map"); });
+
+    document.body.addEventListener("gesturestart", (e) => e.preventDefault());
+  </script>
+</body>
+</html>
