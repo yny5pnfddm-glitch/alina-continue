@@ -324,6 +324,32 @@
     .kw-form .btn { width: auto; letter-spacing: 0.08em; padding: 12px 16px; }
     .reveal-btn[disabled] { opacity: 0.45; }
     .reveal-btn { margin-top: 4px; }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 16px);
+      background: rgba(10, 7, 8, 0.72);
+    }
+    .modal[hidden] { display: none; }
+    .modal-card {
+      width: min(100%, 340px);
+      background: #1c1216;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 18px;
+      text-align: center;
+    }
+    .modal-card p {
+      font-family: var(--serif);
+      font-size: 22px;
+      margin: 0 0 18px;
+      color: var(--gold-2);
+      line-height: 1.35;
+    }
     .mini {
       display: flex;
       flex-direction: column;
@@ -518,6 +544,15 @@
       <h2>сохранено.</h2>
       <p id="finaleText">Плёнка собрана: 25 кадров про нас. Continue? Да. Сохранено.</p>
       <button class="btn" id="againBtn" type="button">ещё раз плёнку</button>
+    </div>
+  </div>
+  <div id="whoModal" class="modal" hidden>
+    <div class="modal-card">
+      <p>Эээ а отгадывать кто будет?</p>
+      <div class="mini-row">
+        <button class="btn" id="whoDima" type="button">Дима</button>
+        <button class="btn ghost" id="whoAlina" type="button">Алина</button>
+      </div>
     </div>
   </div>
 
@@ -1114,12 +1149,20 @@
       });
     }
 
+    let pendingWhoReveal = null;
+    let pendingWhoDeny = null;
     let guessTick = null;
+    function hideWhoModal() {
+      $("whoModal").hidden = true;
+      pendingWhoReveal = null;
+      pendingWhoDeny = null;
+    }
     function stopGuessTick() {
       if (guessTick) {
         clearInterval(guessTick);
         guessTick = null;
       }
+      hideWhoModal();
     }
 
     function completeFrame(id) {
@@ -1306,9 +1349,11 @@
         paintReveal();
       }, 1000);
 
-      revealBtn.addEventListener("click", () => {
+      let revealClicks = 0;
+
+      function openOneWord() {
         const rest = leftover();
-        if (!rest.length || left > 0) return;
+        if (!rest.length) return;
         const i = rest[0];
         found[i] = true;
         err.textContent = "открыто: " + f.keywords[i];
@@ -1316,6 +1361,19 @@
         paintSlots();
         paintReveal();
         if (!leftover().length) finishWords();
+      }
+
+      revealBtn.addEventListener("click", () => {
+        const rest = leftover();
+        if (!rest.length || left > 0) return;
+        revealClicks += 1;
+        if (revealClicks % 2 === 0) {
+          pendingWhoReveal = openOneWord;
+          pendingWhoDeny = () => { revealClicks -= 1; };
+          $("whoModal").hidden = false;
+          return;
+        }
+        openOneWord();
       });
 
       form.addEventListener("submit", (e) => {
@@ -1724,6 +1782,16 @@
       mini.appendChild(lab);
     }
 
+    $("whoDima").addEventListener("click", () => {
+      const fn = pendingWhoReveal;
+      hideWhoModal();
+      if (fn) fn();
+    });
+    $("whoAlina").addEventListener("click", () => {
+      const deny = pendingWhoDeny;
+      hideWhoModal();
+      if (deny) deny();
+    });
     $("yesBtn").addEventListener("click", () => { renderMap(); show("map"); });
     $("continueBtn").addEventListener("click", () => {
       if (state.heat >= 25) show("finale");
