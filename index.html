@@ -350,6 +350,11 @@
       color: var(--gold-2);
       line-height: 1.35;
     }
+    .modal-card .btn.glow {
+      box-shadow: 0 0 0 2px var(--gold), 0 0 22px rgba(231, 198, 168, 0.45);
+      border-color: var(--gold);
+      color: var(--gold-2);
+    }
     .mini {
       display: flex;
       flex-direction: column;
@@ -1152,10 +1157,20 @@
     let pendingWhoReveal = null;
     let pendingWhoDeny = null;
     let guessTick = null;
-    function hideWhoModal() {
-      $("whoModal").hidden = true;
-      pendingWhoReveal = null;
-      pendingWhoDeny = null;
+    function shuffleWhoModal() {
+      const row = $("whoModal").querySelector(".mini-row");
+      const dima = $("whoDima");
+      const alina = $("whoAlina");
+      dima.classList.remove("glow");
+      alina.classList.remove("glow");
+      if (Math.random() < 0.5) {
+        row.appendChild(dima);
+        row.appendChild(alina);
+      } else {
+        row.appendChild(alina);
+        row.appendChild(dima);
+      }
+      (Math.random() < 0.5 ? dima : alina).classList.add("glow");
     }
     function stopGuessTick() {
       if (guessTick) {
@@ -1368,8 +1383,15 @@
         if (!rest.length || left > 0) return;
         revealClicks += 1;
         if (revealClicks % 2 === 0) {
+          left = WAIT;
+          paintReveal();
           pendingWhoReveal = openOneWord;
-          pendingWhoDeny = () => { revealClicks -= 1; };
+          pendingWhoDeny = () => {
+            revealClicks -= 1;
+            left = WAIT;
+            paintReveal();
+          };
+          shuffleWhoModal();
           $("whoModal").hidden = false;
           return;
         }
