@@ -487,6 +487,7 @@
         <p class="boot-copy">Мы чуть сбились с уровня. Я не хочу начинать заново — хочу сохранить игру. 25 кадров, начинается в Ереване. Разгадай слова — собери фото. Нажми YES.</p>
         <div class="choices">
           <button class="btn" id="yesBtn" type="button">YES · 25 кадров</button>
+          <button class="btn" id="continueBtn" type="button" hidden>продолжить</button>
           <button class="btn ghost" id="noBtn" type="button">NO (шутка, нельзя)</button>
         </div>
       </div>
@@ -712,19 +713,19 @@
 
     Object.assign(FRAMES[10], {
       title: "Плёс",
-      text: "Лето 2026. Повторяем проход в верёвочном парке в Плёсе. Алина пошла по сложной трассе — эксперт.",
-      keywords: ["плес", "веревочный", "парк", "эксперт"],
+      text: "Лето 2026. Плёс. Верёвочный парк. Алина выбрала синюю трассу. С нами ездила мама.",
+      keywords: ["плес", "веревочный", "синяя", "мама"],
       aliases: {
         плес: ["плес", "плёс", "плесе", "плёсе"],
         веревочный: ["веревочный", "верёвочный", "веревочном", "верёвочном"],
-        парк: ["парк", "парке"],
-        эксперт: ["эксперт", "сложная", "сложной"]
+        синяя: ["синяя", "синюю", "синей", "синий"],
+        мама: ["мама", "мамы", "мамой"]
       },
       hints: [
         "город",
-        "какой парк",
-        "где это",
-        "какую трассу выбрала Алина"
+        "какой парк мы там посещали",
+        "какую трассу выбрала Алина (вроде)",
+        "кто ездил с нами"
       ]
     });
 
@@ -981,12 +982,59 @@
       ]
     });
 
+    const SAVE_KEY = "alina-continue-v1";
     const state = {
       unlocked: 1,
       done: {},
       heat: 0,
       index: 1
     };
+
+    function hasSave() {
+      return state.heat > 0 || Object.keys(state.done).length > 0;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+          unlocked: state.unlocked,
+          done: state.done,
+          heat: state.heat
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s.unlocked) state.unlocked = s.unlocked;
+        if (s.done && typeof s.done === "object") state.done = s.done;
+        if (typeof s.heat === "number") state.heat = s.heat;
+      } catch (e) {}
+    }
+
+    function resetSave() {
+      state.unlocked = 1;
+      state.done = {};
+      state.heat = 0;
+      state.index = 1;
+      try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+    }
+
+    function paintBoot() {
+      const c = $("continueBtn");
+      if (!c) return;
+      if (hasSave()) {
+        c.hidden = false;
+        c.textContent = state.heat >= 25 ? "к финалу" : ("продолжить · " + state.heat + "/25");
+      } else {
+        c.hidden = true;
+      }
+    }
+
+    loadState();
 
     const $ = (id) => document.getElementById(id);
     const screens = { boot: $("boot"), map: $("map"), level: $("level"), finale: $("finale") };
@@ -1082,6 +1130,8 @@
         state.heat += 1;
         if (id === state.unlocked && state.unlocked < 25) state.unlocked += 1;
       }
+      saveState();
+      paintBoot();
       if (state.heat >= 25) {
         show("finale");
         return;
@@ -1676,11 +1726,16 @@
     }
 
     $("yesBtn").addEventListener("click", () => { renderMap(); show("map"); });
+    $("continueBtn").addEventListener("click", () => {
+      if (state.heat >= 25) show("finale");
+      else { renderMap(); show("map"); }
+    });
     $("noBtn").addEventListener("click", () => {
       $("noBtn").textContent = "ну нет, только YES";
     });
     $("backBtn").addEventListener("click", () => { stopGuessTick(); renderMap(); show("map"); });
-    $("againBtn").addEventListener("click", () => { renderMap(); show("map"); });
+    $("againBtn").addEventListener("click", () => { resetSave(); paintBoot(); renderMap(); show("map"); });
+    paintBoot();
 
     document.body.addEventListener("gesturestart", (e) => e.preventDefault());
   </script>
