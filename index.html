@@ -185,6 +185,7 @@
     }
     .frame {
       position: relative;
+      z-index: 1;
       aspect-ratio: 3 / 4;
       border-radius: 14px;
       border: 1px solid var(--line);
@@ -194,6 +195,7 @@
       color: inherit;
       font: inherit;
       text-align: left;
+      cursor: pointer;
     }
     .frame img, .frame .ph {
       width: 100%;
@@ -328,13 +330,17 @@
       position: fixed;
       inset: 0;
       z-index: 80;
-      display: flex;
+      display: none;
+      pointer-events: none;
       align-items: center;
       justify-content: center;
       padding: calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 16px);
       background: rgba(10, 7, 8, 0.72);
     }
-    .modal[hidden] { display: none; }
+    .modal.is-open {
+      display: flex;
+      pointer-events: auto;
+    }
     .modal-card {
       width: min(100%, 340px);
       background: #1c1216;
@@ -551,7 +557,7 @@
       <button class="btn" id="againBtn" type="button">ещё раз плёнку</button>
     </div>
   </div>
-  <div id="whoModal" class="modal" hidden>
+  <div id="whoModal" class="modal">
     <div class="modal-card">
       <p>Эээ а отгадывать кто будет?</p>
       <div class="mini-row">
@@ -1172,6 +1178,11 @@
       }
       (Math.random() < 0.5 ? dima : alina).classList.add("glow");
     }
+    function hideWhoModal() {
+      $("whoModal").classList.remove("is-open");
+      pendingWhoReveal = null;
+      pendingWhoDeny = null;
+    }
     function stopGuessTick() {
       if (guessTick) {
         clearInterval(guessTick);
@@ -1392,7 +1403,7 @@
             paintReveal();
           };
           shuffleWhoModal();
-          $("whoModal").hidden = false;
+          $("whoModal").classList.add("is-open");
           return;
         }
         openOneWord();
